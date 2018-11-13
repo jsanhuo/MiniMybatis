@@ -3,21 +3,24 @@ package cn.chenmixuexi.sqlfactory;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class MySqlSessionFactory {
-    private String driver;
-    private String url;
-    private String name;
-    private String password;
-    private String interfacePath;
-    private String sqlXmlFilePath;
+    private ArrayList<String> interfacePath;
+    private ArrayList<String> sqlXmlFilePath;
     private DataSource dataSource;
 
-
+    public MySqlSessionFactory() {
+    }
+    public MySqlSessionFactory(ArrayList<String> interfacePath, ArrayList<String> sqlXmlFilePath, DataSource dataSource) {
+        this.interfacePath = interfacePath;
+        this.sqlXmlFilePath = sqlXmlFilePath;
+        this.dataSource = dataSource;
+    }
     public MySqlSession openSession() throws SQLException {
         Connection connection = dataSource.getConnection();
         connection.setAutoCommit(false);
-        return null;
+        return new MySqlSession(connection);
     }
 
     /**
@@ -29,7 +32,7 @@ public class MySqlSessionFactory {
     public MySqlSession openSession(boolean b) throws SQLException {
         Connection connection = dataSource.getConnection();
         connection.setAutoCommit(b);
-        return null;
+        return new MySqlSession(connection);
     }
 
 }
