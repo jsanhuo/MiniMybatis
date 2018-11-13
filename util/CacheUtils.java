@@ -8,15 +8,15 @@ public class CacheUtils {
     public static void CleanCache(String tableName,ConcurrentHashMap<CacheBean,Object> firstLevelCache,ConcurrentHashMap<CacheBean,Object> SecondLevelCache){
         if(firstLevelCache!=null){
             for (CacheBean cacheBean:firstLevelCache.keySet()){
-                if(cacheBean.getTableName().equals(tableName)){
-                    firstLevelCache.put(cacheBean,null);
+                if(cacheBean!=null&&tableName.equals(cacheBean.getTableName())){
+                    firstLevelCache.put(cacheBean,CacheBean.NULL_CACHE_BEAN);
                 }
             }
         }
         if(SecondLevelCache!=null){
             for (CacheBean cacheBean:SecondLevelCache.keySet()){
-                if(cacheBean.getTableName().equals(tableName)){
-                    SecondLevelCache.put(cacheBean,null);
+                if(cacheBean!=null&&tableName.equals(cacheBean.getTableName())){
+                    SecondLevelCache.put(cacheBean,CacheBean.NULL_CACHE_BEAN);
                 }
             }
         }

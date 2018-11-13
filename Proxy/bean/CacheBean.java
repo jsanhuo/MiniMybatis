@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class CacheBean {
+    public static String NULL_CACHE_BEAN = "NULL_CACHE_BEAN";
     private String sql;
     private Object[] args;
     private String tableName;

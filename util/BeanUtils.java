@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class BeanUtils {
@@ -40,7 +41,7 @@ public class BeanUtils {
      * @throws InstantiationException
      * @throws InvocationTargetException
      */
-    public static <T> ArrayList<T>  builderObjectList(Class<T> oClass, ArrayList<HashMap<String, Object>> maps) throws IllegalAccessException, InstantiationException, InvocationTargetException {
+    public static <T> ArrayList<T>  builderObjectList(Class<T> oClass, ArrayList<HashMap<String, Object>> maps) {
         ArrayList<T> ts = new ArrayList<>();
         int len = maps.size();
         for (int i = 0; i < len; i++) {
@@ -60,14 +61,47 @@ public class BeanUtils {
      * @throws InstantiationException
      * @throws InvocationTargetException
      */
-    public static <T> T  builderObject(Class<T> oClass, HashMap<String,Object> map) throws IllegalAccessException, InstantiationException, InvocationTargetException {
-        T t = oClass.newInstance();
+    public static <T> T  builderObject(Class<T> oClass, HashMap<String,Object> map)  {
+        T t = null;
+        try {
+            t = oClass.newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("获取实例失败");
+        }
         Field[] declaredFields = oClass.getDeclaredFields();
         for (Field f :
                 declaredFields) {
             f.setAccessible(true);
-            f.set(t,map.get(f.getName()));
+            try {
+                f.set(t,map.get(f.getName()));
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+                System.err.println("设置参数失败");
+            }
         }
         return t;
+    }
+
+
+    public static <T> Field[] getNotNullField(T bean){
+        Field[] fields = bean.getClass().getDeclaredFields();
+        int len = fields.length;
+        Field[] temp = new Field[len];
+        int count=0;
+        for(int i=0;i<len;i++){
+            Field field = fields[i];
+            field.setAccessible(true);
+            Object o=null;
+            try {
+                o = field.get(bean);
+            } catch (IllegalAccessException e) {
+                System.err.println("未定义的字段");
+            }
+            if(o!=null){
+                temp[count++]=field;
+            }
+        }
+        return Arrays.copyOf(temp,count);
     }
 }

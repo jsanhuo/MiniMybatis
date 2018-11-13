@@ -1,5 +1,6 @@
 package cn.chenmixuexi.Proxy;
 
+import cn.chenmixuexi.Student;
 import cn.chenmixuexi.annotation.MyDelete;
 import cn.chenmixuexi.annotation.MyInsert;
 import cn.chenmixuexi.annotation.MySelect;
@@ -17,6 +18,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -54,70 +56,99 @@ public class MapperInvocationHandler implements InvocationHandler {
             }
             //插入操作
             if(a instanceof MyInsert){
-                return InsertOpertion(a,method,args);
+                try {
+                    return InsertOpertion(a,method,args);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    System.err.println("Insert操作错误");
+                }
             }
             //删除操作
             if(a instanceof MyDelete){
-                return DeleteOpertion(a,method,args);
+                try {
+                    return DeleteOpertion(a,method,args);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    System.err.println("Delete操作错误");
+                }
             }
             //修改操作
             if(a instanceof MyUpdate){
-                return UpdateOpertion(a,method,args);
+                try {
+                    return UpdateOpertion(a,method,args);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    System.err.println("Update操作错误");
+                }
             }
         }
         return null;
     }
 
-    private Object UpdateOpertion(Annotation a, Method method, Object[] args) {
+    private Object UpdateOpertion(Annotation a, Method method, Object[] args) throws SQLException {
         String value = ((MyUpdate) a).value();
         //进行SQL的处理
         String s = SqlUtils.builderSql(value);
-
-        return null;
+        String tableName = s.split(" ")[1];
+        PreparedStatement preparedStatement = connection.prepareStatement(s);
+        int len = args.length;
+        for (int i = 0; i < len; i++) {
+            preparedStatement.setObject(i+1,args[i]);
+        }
+        int execute = preparedStatement.executeUpdate();
+        if(execute>=1){
+            CacheUtils.CleanCache(tableName,firstLevelCache,SecondLevelCache);
+        }
+        return execute>=1;
     }
 
-    private Object DeleteOpertion(Annotation a, Method method, Object[] args) {
+    private Object DeleteOpertion(Annotation a, Method method, Object[] args) throws SQLException {
         String value = ((MyDelete) a).value();
         //进行SQL的处理
         String s = SqlUtils.builderSql(value);
-        return null;
+        String tableName = s.split(" ")[2];
+        PreparedStatement preparedStatement = connection.prepareStatement(s);
+        int len = args.length;
+        for (int i = 0; i < len; i++) {
+            preparedStatement.setObject(i+1,args[i]);
+        }
+        int execute = preparedStatement.executeUpdate();
+        if(execute>=1){
+            CacheUtils.CleanCache(tableName,firstLevelCache,SecondLevelCache);
+        }
+        return execute>=1;
     }
 
-    private Object InsertOpertion(Annotation a, Method method, Object[] args) {
+    private Object InsertOpertion(Annotation a, Method method, Object[] args) throws SQLException{
         String value = ((MyInsert) a).value();
         //进行SQL的处理
         String s = SqlUtils.builderSql(value);
         String tableName = s.split(" ")[2];
-        CacheUtils.CleanCache(tableName,firstLevelCache,SecondLevelCache);
-        Class<?> parameter = method.getParameterTypes()[0];
-        Object x = args[0];
-
-        return true;
+        PreparedStatement preparedStatement = connection.prepareStatement(s);
+        int len = args.length;
+        for (int i = 0; i < len; i++) {
+            preparedStatement.setObject(i+1,args[i]);
+        }
+        int execute = preparedStatement.executeUpdate();
+        if(execute>=1){
+            CacheUtils.CleanCache(tableName,firstLevelCache,SecondLevelCache);
+        }
+        return execute>=1;
     }
 
-    /**
-     * Select操作
-     * @param a         注解
-     * @param method    方法
-     * @param args      参数列表
-     * @return
-     * @throws IllegalAccessException
-     * @throws InvocationTargetException
-     * @throws InstantiationException
-     * @throws SQLException
-     */
-    public Object SelectOpertion(Annotation a,Method method,Object[] args) throws IllegalAccessException, InvocationTargetException, InstantiationException, SQLException {
+
+    public Object SelectOpertion(Annotation a,Method method,Object[] args) throws SQLException {
         String value = ((MySelect) a).value();
         //进行SQL的处理
         String s = SqlUtils.builderSql(value);
         CacheBean cacheBean = new CacheBean(s, args);
         Object o1 = firstLevelCache.get(cacheBean);
-        if(firstLevelCache.get(cacheBean)!=null){
+        if(o1!=null&&!CacheBean.NULL_CACHE_BEAN.equals(o1)){
             System.out.println("通过一级缓存访问成功");
             return o1;
         }
         o1 = SecondLevelCache.get(cacheBean);
-        if(o1!=null){
+        if(o1!=null&&!CacheBean.NULL_CACHE_BEAN.equals(o1)){
             System.out.println("通过二级缓存访问成功");
             return o1;
         }
@@ -129,19 +160,24 @@ public class MapperInvocationHandler implements InvocationHandler {
         }
         ResultSet resultSet = preparedStatement.executeQuery();
         Class<?> returnType = method.getReturnType();
+        boolean tag = false;
         //获得底层方法的正式返回类型如ArrayList<IStudent> 返回即为 java.util.List<MyMyBatis.IStudent>
         Type genericReturnType = method.getGenericReturnType();
         //判断其是否为泛型化的字段
         if(genericReturnType instanceof ParameterizedType){
             //获得其中的MyMyBatis.IStudent
             returnType = (Class) ((ParameterizedType)genericReturnType).getActualTypeArguments()[0];
+            tag=true;
         }
         ArrayList<HashMap<String, Object>> hashMaps = BeanUtils.resultToMap(returnType, resultSet);
         Object o=null;
-        if(hashMaps.size()==1){
+        if(hashMaps.size()==1&&!tag){
             o = BeanUtils.builderObject(returnType, hashMaps.get(0));
-        }else{
+        }else if(hashMaps.size()>=1&&tag){
             o = BeanUtils.builderObjectList(returnType, hashMaps);
+        }else{
+            System.out.println("无数据");
+            return null;
         }
         firstLevelCache.put(cacheBean,o);
         SecondLevelCache.put(cacheBean,o);
