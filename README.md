@@ -1,7 +1,10 @@
-# MiniMybatis
+MiniMybatis
+=========
 自己搭建Mybatis
-#使用方式
-##配置文件
+使用方式
+=========
+配置文件
+--------
 ```xml
 <configuration>
         <environment id="development">
@@ -16,8 +19,8 @@
     </mappers>
 </configuration>
 ```
-
-## sqlSession的初始化
+1.sqlSession的初始化
+--------
 ```java
 //读取配置文件获取MySqlSessionFactory
 MySqlSessionFactory build = new MySqlSessionFactoryBuilder().build(new File("./src/main/resource/mybatis.xml"));
@@ -25,7 +28,8 @@ MySqlSessionFactory build = new MySqlSessionFactoryBuilder().build(new File("./s
 MySqlSession mySqlSession = build.openSession(true);
 ```
 
-##1.定义bean
+2.定义bean
+--------
 ```java
 public class Student implements Serializable {
     private Integer id;
@@ -85,7 +89,8 @@ public class Student implements Serializable {
 ```
 
 
-## 2.定义接口
+3.定义接口
+--------
 ```java
 public interface IStudent {
     @MySelect("Select * from student")
@@ -100,7 +105,8 @@ public interface IStudent {
     public boolean Update(String name,Integer id);
 }
 ```
-##3.通过SqlSession获取Map实例进行相应操作
+4.通过SqlSession获取Map实例进行相应操作
+--------
 ```java
 //获得mapper的实例
 IStudent mapper = mySqlSession.getMapper(IStudent.class);
