@@ -7,6 +7,10 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
+/**
+ * 抽象数据源
+ * @author 焦焱
+ */
 public abstract class absDefaultDataSource implements DataSource {
     @Override
     public Connection getConnection() throws SQLException {
