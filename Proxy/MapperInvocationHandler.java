@@ -18,20 +18,23 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MapperInvocationHandler implements InvocationHandler {
     private Connection connection;
     //一级缓存
-    private ConcurrentHashMap<CacheBean,Object> firstLevelCache;
+    private static ArrayList<ConcurrentHashMap<CacheBean,Object>> firstLevelCacheList = new ArrayList<ConcurrentHashMap<CacheBean,Object>>();
     //二级缓存
     private static ConcurrentHashMap<CacheBean,Object> SecondLevelCache = new ConcurrentHashMap<CacheBean,Object>();
 
+    private ConcurrentHashMap<CacheBean, Object> firstLevelCache;
+
+
     public MapperInvocationHandler(Connection connection, ConcurrentHashMap<CacheBean, Object> firstLevelCache) {
         this.connection = connection;
-        this.firstLevelCache = firstLevelCache;
+        this.firstLevelCache=firstLevelCache;
+        firstLevelCacheList.add(firstLevelCache);
     }
 
     @Override
@@ -97,7 +100,7 @@ public class MapperInvocationHandler implements InvocationHandler {
         }
         int execute = preparedStatement.executeUpdate();
         if(execute>=1){
-            CacheUtils.CleanCache(tableName,firstLevelCache,SecondLevelCache);
+            CacheUtils.CleanCache(tableName,firstLevelCacheList,SecondLevelCache);
         }
         return execute>=1;
     }
@@ -114,7 +117,7 @@ public class MapperInvocationHandler implements InvocationHandler {
         }
         int execute = preparedStatement.executeUpdate();
         if(execute>=1){
-            CacheUtils.CleanCache(tableName,firstLevelCache,SecondLevelCache);
+            CacheUtils.CleanCache(tableName,firstLevelCacheList,SecondLevelCache);
         }
         return execute>=1;
     }
@@ -131,7 +134,7 @@ public class MapperInvocationHandler implements InvocationHandler {
         }
         int execute = preparedStatement.executeUpdate();
         if(execute>=1){
-            CacheUtils.CleanCache(tableName,firstLevelCache,SecondLevelCache);
+            CacheUtils.CleanCache(tableName,firstLevelCacheList,SecondLevelCache);
         }
         return execute>=1;
     }
@@ -150,6 +153,7 @@ public class MapperInvocationHandler implements InvocationHandler {
         o1 = SecondLevelCache.get(cacheBean);
         if(o1!=null&&!CacheBean.NULL_CACHE_BEAN.equals(o1)){
             System.out.println("通过二级缓存访问成功");
+            firstLevelCache.put(cacheBean,o1);
             return o1;
         }
         PreparedStatement preparedStatement = connection.prepareStatement(s);
