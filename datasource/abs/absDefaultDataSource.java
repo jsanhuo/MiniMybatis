@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 
 /**
  * 抽象数据源
+ *
  * @author 焦焱
  */
 public abstract class absDefaultDataSource implements DataSource {
@@ -43,13 +44,13 @@ public abstract class absDefaultDataSource implements DataSource {
     }
 
     @Override
-    public void setLoginTimeout(int seconds) throws SQLException {
-
+    public int getLoginTimeout() throws SQLException {
+        return 0;
     }
 
     @Override
-    public int getLoginTimeout() throws SQLException {
-        return 0;
+    public void setLoginTimeout(int seconds) throws SQLException {
+
     }
 
     @Override

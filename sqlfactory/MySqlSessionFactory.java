@@ -12,11 +12,13 @@ public class MySqlSessionFactory {
 
     public MySqlSessionFactory() {
     }
+
     public MySqlSessionFactory(ArrayList<String> interfacePath, ArrayList<String> sqlXmlFilePath, DataSource dataSource) {
         this.interfacePath = interfacePath;
         this.sqlXmlFilePath = sqlXmlFilePath;
         this.dataSource = dataSource;
     }
+
     public MySqlSession openSession() throws SQLException {
         Connection connection = dataSource.getConnection();
         connection.setAutoCommit(false);
@@ -25,6 +27,7 @@ public class MySqlSessionFactory {
 
     /**
      * 是否自动提交事务
+     *
      * @param b
      * @return
      * @throws SQLException

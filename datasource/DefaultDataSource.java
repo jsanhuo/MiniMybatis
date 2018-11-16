@@ -8,6 +8,7 @@ import java.sql.SQLException;
 
 /**
  * 默认的数据源(运用原生的JDBC封装的数据源)
+ *
  * @author 焦焱
  */
 public class DefaultDataSource extends absDefaultDataSource {
@@ -18,6 +19,7 @@ public class DefaultDataSource extends absDefaultDataSource {
 
     /**
      * 构造函数
+     *
      * @param dirverClassName
      * @param url
      * @param user
@@ -34,13 +36,14 @@ public class DefaultDataSource extends absDefaultDataSource {
     /**
      * 初始化
      */
-    private void init(){
+    private void init() {
         try {
             Class.forName(dirverClassName);
         } catch (ClassNotFoundException e) {
             System.out.println("加载类驱动错误");
         }
     }
+
     /**
      * 获取一个数据库连接
      *
@@ -53,7 +56,8 @@ public class DefaultDataSource extends absDefaultDataSource {
 
     /**
      * 建立连接
-     * @return  JDBC连接
+     *
+     * @return JDBC连接
      * @throws SQLException
      */
     private Connection makeConnection() throws SQLException {

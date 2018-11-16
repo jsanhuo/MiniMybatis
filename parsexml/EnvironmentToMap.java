@@ -7,8 +7,8 @@ import org.w3c.dom.NodeList;
 import java.util.HashMap;
 
 public class EnvironmentToMap {
-    public static HashMap<String,String> NodeToMap(Node node){
-        if(node==null){
+    public static HashMap<String, String> NodeToMap(Node node) {
+        if (node == null) {
             return null;
         }
         NodeList childNodes = node.getChildNodes();
@@ -16,11 +16,11 @@ public class EnvironmentToMap {
         int len = childNodes.getLength();
         for (int i = 0; i < len; i++) {
             Node item = childNodes.item(i);
-            if(item instanceof Element){
-                if(item.getNodeName().equals("property")){
+            if (item instanceof Element) {
+                if (item.getNodeName().equals("property")) {
                     String name = ((Element) item).getAttribute("name");
                     String value = ((Element) item).getAttribute("value");
-                    environment.put(name,value);
+                    environment.put(name, value);
                 }
             }
 

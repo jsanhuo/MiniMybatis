@@ -9,15 +9,17 @@ import java.sql.SQLException;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MySqlSession {
-    private ConcurrentHashMap<CacheBean,Object> firstLevelCache;
+    private ConcurrentHashMap<String, ConcurrentHashMap<CacheBean, Object>> firstLevelCache;
     private Connection connection;
 
     public MySqlSession(Connection connection) {
         this.connection = connection;
-        firstLevelCache = new ConcurrentHashMap<CacheBean,Object>();
+        firstLevelCache = new ConcurrentHashMap<String, ConcurrentHashMap<CacheBean, Object>>();
     }
+
     /**
      * 提交事务
+     *
      * @throws SQLException
      */
     public void commit() {
@@ -28,27 +30,29 @@ public class MySqlSession {
         }
     }
 
-    public void roolback()  {
+    public void roolback() {
         try {
             connection.rollback();
         } catch (SQLException e) {
             System.err.println("回滚失败");
         }
     }
+
     /**
      * 关闭连接
      */
-    public void close(){
+    public void close() {
         try {
             connection.close();
         } catch (SQLException e) {
             System.err.println("关闭连接失败");
         }
     }
-    public <T> T getMapper(Class<T> mapp){
-        if(!mapp.isInterface()){
-            throw new IllegalArgumentException(mapp+"is not an interface");
+
+    public <T> T getMapper(Class<T> mapp) {
+        if (!mapp.isInterface()) {
+            throw new IllegalArgumentException(mapp + "is not an interface");
         }
-        return (T)Proxy.newProxyInstance(mapp.getClassLoader(),new Class[]{mapp},new MapperInvocationHandler(connection,firstLevelCache));
+        return (T) Proxy.newProxyInstance(mapp.getClassLoader(), new Class[]{mapp}, new MapperInvocationHandler(connection, firstLevelCache));
     }
 }

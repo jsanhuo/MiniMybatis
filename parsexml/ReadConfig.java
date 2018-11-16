@@ -10,11 +10,11 @@ import java.io.InputStream;
 
 public class ReadConfig {
 
-    public static NodeList readConfig(InputStream inputStream){
+    public static NodeList readConfig(InputStream inputStream) {
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = null;
         try {
-            documentBuilder= documentBuilderFactory.newDocumentBuilder();
+            documentBuilder = documentBuilderFactory.newDocumentBuilder();
             Document parse = documentBuilder.parse(inputStream);
             return parse.getDocumentElement().getChildNodes();
         } catch (Exception e) {
@@ -23,11 +23,11 @@ public class ReadConfig {
         return null;
     }
 
-    public static NodeList readConfig(File file){
+    public static NodeList readConfig(File file) {
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = null;
         try {
-            documentBuilder= documentBuilderFactory.newDocumentBuilder();
+            documentBuilder = documentBuilderFactory.newDocumentBuilder();
             Document parse = documentBuilder.parse(file);
             return parse.getDocumentElement().getChildNodes();
         } catch (Exception e) {
